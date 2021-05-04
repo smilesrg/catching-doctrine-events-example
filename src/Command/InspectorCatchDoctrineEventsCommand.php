@@ -38,12 +38,23 @@ class InspectorCatchDoctrineEventsCommand extends Command
         $faker = \Faker\Factory::create();
 
         $phoneBook = new Phonebook();
+        $phoneBookRepository = $this->entityManager->getRepository(Phonebook::class);
 
         $phoneBook->setFirstName($faker->firstName());
         $phoneBook->setLastName($faker->lastName());
         $phoneBook->setPhoneNumber($faker->phoneNumber());
 
         $this->entityManager->persist($phoneBook);
+        $this->entityManager->flush();
+        $phoneBookId = $phoneBook->getId();
+
+        $this->entityManager->clear();
+        $phoneBook = $phoneBookRepository->find($phoneBookId);
+
+        $phoneBook->setPhoneNumber($faker->phoneNumber());
+        $this->entityManager->flush();
+
+        $this->entityManager->remove($phoneBook);
         $this->entityManager->flush();
 
         $io->success('Command finished successfully');

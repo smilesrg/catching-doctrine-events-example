@@ -13,6 +13,7 @@ class DatabaseActivitySubscriber implements EventSubscriber
     public function getSubscribedEvents(): array
     {
         return [
+            Events::postLoad,
             Events::postPersist,
             Events::postRemove,
             Events::postUpdate,
@@ -22,25 +23,30 @@ class DatabaseActivitySubscriber implements EventSubscriber
     // callback methods must be called exactly like the events they listen to;
     // they receive an argument of type LifecycleEventArgs, which gives you access
     // to both the entity object of the event and the entity manager itself
+    public function postLoad(LifecycleEventArgs $args): void
+    {
+        $this->logActivity('SELECT', $args);
+    }
+
     public function postPersist(LifecycleEventArgs $args): void
     {
-        $this->logActivity('persist', $args);
+        $this->logActivity('INSERT', $args);
     }
 
     public function postRemove(LifecycleEventArgs $args): void
     {
-        $this->logActivity('remove', $args);
+        $this->logActivity('DELETE', $args);
     }
 
     public function postUpdate(LifecycleEventArgs $args): void
     {
-        $this->logActivity('update', $args);
+        $this->logActivity('UPDATE', $args);
     }
 
     private function logActivity(string $action, LifecycleEventArgs $args): void
     {
         $entity = $args->getObject();
 
-        // ... get the entity information and log it somehow
+        echo "$action event on entity:".serialize($entity).PHP_EOL;
     }
 }
